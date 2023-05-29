@@ -1,46 +1,4 @@
-<?php 
-    session_start();
-    include_once 'conn.php';
-
-    if(isset($_SESSION['loggedin'])){
-        
-        if(strtoupper($_SESSION['role']) == 'ADMIN'){
-            header('location: admin/users.php');
-        }
-        
-        exit;
-    }
-
-    if(isset($_POST['submit'])){
-        $username = $_POST['username'];
-        $password = $_POST['password'];
-        
-        $db = new DbConn();
-        $pdo = $db->connect();
-        $sql = "SELECT * FROM users WHERE username=:username";
-        $stmt = $pdo->prepare($sql);
-        $stmt->bindValue(':username', strtolower($username));
-        $stmt->execute();
-        $user = $stmt->fetch();
-
-        if($user && password_verify($password, $user['password'])){
-            $_SESSION['loggedin'] = true;
-            $_SESSION['username'] = $user['username'];
-            $_SESSION['password'] = $password;
-            $_SESSION['fullname'] = $user['fullname'];
-            $_SESSION['role'] = $user['role'];
-            
-            if(strtoupper($user['role']) == 'ADMIN'){
-                header('location: admin/users.php');
-            }
-            
-            exit;
-        } else{
-            $_SESSION['message'] = "Invalid username or password";
-        }
-
-    }
-?>
+<?php include 'login.php' ?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -55,7 +13,7 @@
 
 <body>
     <div class="container mt-5">
-        <form action="" method="POST">
+        <form action="<?php echo $_SERVER['PHP_SELF'] ?>" method="POST">
             <div class="mb-3">
                 <label class="form-label">Username</label>
                 <input type="text" class="form-control form-control-sm shadow-none" name="username" required
@@ -71,12 +29,12 @@
             </div>
         </form>
         <?php
-            if(!isset($_SESSION['loggedin']) && isset($_SESSION['message'])){
-            ?>
+        if (!isset($_SESSION['loggedin']) && isset($_SESSION['message'])) {
+        ?>
         <p class="text-danger"><?php echo $_SESSION['message'] ?></p>
         <?php
             unset($_SESSION['message']);
-            }
+        }
         ?>
     </div>
     <script src="Vendors/bootstrap/bootstrap.bundle.min.js"></script>
