@@ -4,30 +4,30 @@
 
 <?php include_once 'includes/content-header.php' ?>
 
-<?php 
-    $db = new  DbConn();
-    $pdo = $db->connect();
+<?php
+$db = new  DbConn();
+$pdo = $db->connect();
 
-    $search = isset($_GET['search']) ? $_GET['search'] : '';
-    $sql = 'SELECT COUNT(id) as totalItems FROM categories WHERE category_name like :category_name';
-    $stmt = $pdo->prepare($sql);
-    $stmt->bindValue(':category_name', '%' . $search . '%');
-    $stmt->execute();
-    $result = $stmt->fetch();
-    
+$search = isset($_GET['search']) ? $_GET['search'] : '';
+$sql = 'SELECT COUNT(id) as totalItems FROM categories WHERE category_name like :category_name';
+$stmt = $pdo->prepare($sql);
+$stmt->bindValue(':category_name', '%' . $search . '%');
+$stmt->execute();
+$result = $stmt->fetch();
 
-    $totalItems = $result['totalItems'];
-    $itemsPerPage = isset($_GET['entries']) ? $_GET['entries'] : 5;
-    $totalPages = ceil($totalItems / $itemsPerPage);
-    $currentPage = isset($_GET['page']) ? $_GET['page'] : 1;
-    $offset = ($currentPage - 1) * $itemsPerPage;
-    
-    $sql = "SELECT * FROM categories WHERE category_name LIKE :category_name ORDER BY id LIMIT $offset, $itemsPerPage";
-    $stmt = $pdo->prepare($sql);
-    $stmt->bindValue(':category_name', '%' . $search . '%');
-    $stmt->execute();
-    $result = $stmt->fetchAll();
-   
+
+$totalItems = $result['totalItems'];
+$itemsPerPage = isset($_GET['entries']) ? $_GET['entries'] : 5;
+$totalPages = ceil($totalItems / $itemsPerPage);
+$currentPage = isset($_GET['page']) ? $_GET['page'] : 1;
+$offset = ($currentPage - 1) * $itemsPerPage;
+
+$sql = "SELECT * FROM categories WHERE category_name LIKE :category_name ORDER BY id LIMIT $offset, $itemsPerPage";
+$stmt = $pdo->prepare($sql);
+$stmt->bindValue(':category_name', '%' . $search . '%');
+$stmt->execute();
+$result = $stmt->fetchAll();
+
 ?>
 
 <div class="content mt-3">
@@ -59,8 +59,8 @@
                 </thead>
                 <tbody>
                     <?php
-                        $counter = 1;
-                        foreach ($result as $category) {
+                    $counter = 1;
+                    foreach ($result as $category) {
                     ?>
                     <tr>
                         <td><?php echo $counter ?></td>
@@ -88,8 +88,15 @@
                         </td>
                     </tr>
                     <?php
-                    $counter++;
-                        }
+                        $counter++;
+                    }
+                    ?>
+                    <?php
+                    if (count($result) == 0) {
+                        echo "<tr>";
+                        echo "<td colspan='3' class='text-center'>No results found</td>";
+                        echo "</tr>";
+                    }
                     ?>
                 </tbody>
             </table>
@@ -115,29 +122,26 @@
             </div>
             <div class="col-auto">
                 <ul class="pagination">
-                    <?php 
+                    <?php
                     if ($totalPages > 1) {
-                       
-                        if($currentPage > 1){
+
+                        if ($currentPage > 1) {
                             $previousPage = $currentPage - 1;
                             echo "<li class='page-item'><a class='page-link text-center' href='?search=$search&page=$previousPage&entries=$itemsPerPage'>Previous</a></li>";
-                        }
-                        else{
+                        } else {
                             echo "<li class='page-item'><a class='page-link text-center disabled'>Previous</a></li>";
                         }
 
                         echo "<li class='page-item'><span class='page-link text-center'>$currentPage of $totalPages</span></li>";
 
-                        if($currentPage < $totalPages){
+                        if ($currentPage < $totalPages) {
                             $nextPage = $currentPage + 1;
                             echo "<li class='page-item'><a class='page-link text-center' href='?search=$search&page=$nextPage&entries=$itemsPerPage'>Next</a></li>";
-                        }
-                        else{
+                        } else {
                             echo " <li class='page-item'><a class='page-link text-center disabled'>Next</a></li>";
                         }
-
                     }
-                     ?>
+                    ?>
                 </ul>
             </div>
         </div>
